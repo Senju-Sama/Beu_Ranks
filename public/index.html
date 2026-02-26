@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Result Portal</title>
+    <!-- Modern Font: Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <!-- FontAwesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body>
+    <div class="background-elements">
+        <div class="glow-orb orb-1"></div>
+        <div class="glow-orb orb-2"></div>
+        <div class="glow-orb orb-3"></div>
+    </div>
+
+    <!-- Navigation Bar -->
+    <nav class="navbar glass-panel">
+        <div class="nav-container">
+            <div class="nav-brand">
+                <i class="fa-solid fa-graduation-cap"></i> Student Portal
+            </div>
+            <ul class="nav-links">
+                <li><a href="index.html" class="active"><i class="fa-solid fa-house"></i> Home</a></li>
+                <li><a href="college-toppers.html"><i class="fa-solid fa-building-columns"></i> College Toppers</a></li>
+                <li><a href="branch-toppers.html"><i class="fa-solid fa-code-branch"></i> Branch Toppers</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container">
+        <header>
+            <h1><i class="fa-solid fa-graduation-cap header-icon"></i> Student Result Portal</h1>
+            <p>Enter your 11-digit registration number to view your detailed academic performance</p>
+        </header>
+
+        <main>
+            <div class="search-box">
+                <form id="search-form">
+                    <div class="input-group">
+                        <i class="fa-solid fa-id-card input-icon"></i>
+                        <input type="text" id="reg-input" placeholder="e.g. 24104102001" pattern="[0-9]{11}" required
+                            title="Please enter a valid 11-digit registration number">
+                        <button type="submit" id="search-btn">
+                            <i class="fa-solid fa-magnifying-glass"></i> Search
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <div id="loader" class="hidden">
+                <div class="spinner"></div>
+                <p>Fetching results...</p>
+            </div>
+
+            <div id="error-message" class="hidden glass-panel error-panel">
+                <i class="fa-solid fa-triangle-exclamation"></i>
+                <span id="error-text"></span>
+            </div>
+
+            <div id="result-container" class="hidden">
+                <!-- Info Section -->
+                <div class="student-info glass-panel slide-up">
+                    <div class="info-header">
+                        <div class="user-details">
+                            <h2><i class="fa-solid fa-user"></i> <span id="student-name"></span></h2>
+                            <div class="reg-badge">Reg No: <span id="student-reg"></span></div>
+                        </div>
+                        <button id="simulate-btn" class="action-btn">
+                            <i class="fa-solid fa-wand-magic-sparkles"></i> Simulate Result
+                        </button>
+                    </div>
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <span class="label">Father's Name</span>
+                            <span class="value" id="student-father"></span>
+                        </div>
+                        <div class="info-item">
+                            <span class="label">Mother's Name</span>
+                            <span class="value" id="student-mother"></span>
+                        </div>
+                        <div class="info-item full-width">
+                            <span class="label">College</span>
+                            <span class="value" id="student-college"></span>
+                        </div>
+                        <div class="info-item full-width">
+                            <span class="label">Course</span>
+                            <span class="value" id="student-course"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Academic Performance Summary -->
+                <div class="performance-summary slide-up delay-1">
+                    <div class="stat-card glass-panel">
+                        <div class="stat-icon"><i class="fa-solid fa-chart-line"></i></div>
+                        <div class="stat-details">
+                            <div class="stat-label">CGPA</div>
+                            <div class="stat-value highlight" id="student-cgpa"></div>
+                        </div>
+                    </div>
+                    <div class="stat-card glass-panel">
+                        <div class="stat-icon"><i class="fa-solid fa-ranking-star"></i></div>
+                        <div class="stat-details">
+                            <div class="stat-label">College Rank</div>
+                            <div class="stat-value" id="student-crank"></div>
+                        </div>
+                    </div>
+                    <div class="stat-card glass-panel">
+                        <div class="stat-icon"><i class="fa-solid fa-trophy"></i></div>
+                        <div class="stat-details">
+                            <div class="stat-label">Overall Rank</div>
+                            <div class="stat-value" id="student-urank"></div>
+                        </div>
+                    </div>
+                    <div class="stat-card glass-panel" id="remarks-card">
+                        <div class="stat-icon"><i class="fa-solid fa-clipboard-check"></i></div>
+                        <div class="stat-details">
+                            <div class="stat-label">Status</div>
+                            <div class="stat-value" id="student-remarks"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Analytical Graph Section -->
+                <div class="analytics-section glass-panel slide-up delay-1-5">
+                    <h3><i class="fa-solid fa-chart-pie"></i> Subject Performance Analysis</h3>
+                    <p class="analytics-subtitle">Compare your performance against the top scores in your college</p>
+
+                    <div class="charts-wrapper"
+                        style="display: grid; grid-template-columns: 1fr; gap: 2rem; margin-top: 1.5rem;">
+                        <div class="chart-block">
+                            <h4
+                                style="text-align: center; color: var(--accent-color); font-weight: 500; margin-bottom: 0.5rem;">
+                                Theory Subjects</h4>
+                            <div class="chart-container" style="position: relative; height: 350px; width: 100%;">
+                                <canvas id="theoryChart"></canvas>
+                            </div>
+                        </div>
+                        <div class="chart-block">
+                            <h4
+                                style="text-align: center; color: var(--accent-color); font-weight: 500; margin-bottom: 0.5rem;">
+                                Practical Subjects</h4>
+                            <div class="chart-container" style="position: relative; height: 350px; width: 100%;">
+                                <canvas id="practicalChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Marks Table -->
+                <div class="marks-section glass-panel slide-up delay-2">
+                    <h3><i class="fa-solid fa-book-open"></i> Academic Record</h3>
+
+                    <div class="table-container">
+                        <table id="theory-table">
+                            <thead>
+                                <tr>
+                                    <th colspan="7" class="table-section-title">Theory Subjects</th>
+                                </tr>
+                                <tr>
+                                    <th>Code</th>
+                                    <th>Subject Name</th>
+                                    <th>Credit</th>
+                                    <th>ESE</th>
+                                    <th>IA</th>
+                                    <th>Total</th>
+                                    <th>Grade</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Theory Rows injected here -->
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="table-container" style="margin-top: 2rem;">
+                        <table id="practical-table">
+                            <thead>
+                                <tr>
+                                    <th colspan="7" class="table-section-title">Practical Subjects</th>
+                                </tr>
+                                <tr>
+                                    <th>Code</th>
+                                    <th>Subject Name</th>
+                                    <th>Credit</th>
+                                    <th>ESE</th>
+                                    <th>IA</th>
+                                    <th>Total</th>
+                                    <th>Grade</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Practical Rows injected here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <footer>
+            <p>&copy; 2026 Student Result Portal. Data sourced from <span id="university-name">University</span>.</p>
+        </footer>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+
+</html>
