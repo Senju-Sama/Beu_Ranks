@@ -196,6 +196,12 @@ app.get('/api/toppers/branch', async (req, res) => {
         res.status(500).json({ error: 'Internal server error' });
     }
 });
-app.listen(PORT, () => {
-    console.log(`Server is running on http://localhost:${PORT}`);
-});
+// Conditionally listen only if run directly (local), otherwise export for Vercel
+if (require.main === module) {
+    app.listen(PORT, () => {
+        console.log(`Server is running on http://localhost:${PORT}`);
+    });
+} else {
+    // Export the app for Vercel serverless functions
+    module.exports = app;
+}
