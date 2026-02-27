@@ -2,11 +2,11 @@ document.addEventListener('DOMContentLoaded', () => {
     // ========================================
     // Global UI Components
     // ========================================
-    
+
     // Hamburger Menu Toggle
     const hamburger = document.querySelector('.hamburger');
     const navLinks = document.querySelector('.nav-links');
-    
+
     if (hamburger && navLinks) {
         hamburger.addEventListener('click', () => {
             hamburger.classList.toggle('active');
@@ -14,7 +14,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const isExpanded = hamburger.classList.contains('active');
             hamburger.setAttribute('aria-expanded', isExpanded);
         });
-        
+
         // Close menu when clicking a link
         navLinks.querySelectorAll('a').forEach(link => {
             link.addEventListener('click', () => {
@@ -23,7 +23,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 hamburger.setAttribute('aria-expanded', 'false');
             });
         });
-        
+
         // Close menu when clicking outside
         document.addEventListener('click', (e) => {
             if (!hamburger.contains(e.target) && !navLinks.contains(e.target)) {
@@ -33,10 +33,10 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     }
-    
+
     // Scroll to Top Button
     const scrollToTopBtn = document.getElementById('scroll-to-top');
-    
+
     if (scrollToTopBtn) {
         window.addEventListener('scroll', () => {
             if (window.pageYOffset > 300) {
@@ -45,7 +45,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 scrollToTopBtn.classList.remove('visible');
             }
         });
-        
+
         scrollToTopBtn.addEventListener('click', () => {
             window.scrollTo({
                 top: 0,
@@ -53,37 +53,37 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         });
     }
-    
+
     // Toast Notification System
     function showToast(message, type = 'info', duration = 3000) {
         const toast = document.getElementById('toast');
         if (!toast) return;
-        
+
         const icons = {
             success: '<i class="fa-solid fa-circle-check"></i>',
             error: '<i class="fa-solid fa-circle-exclamation"></i>',
             info: '<i class="fa-solid fa-circle-info"></i>'
         };
-        
+
         toast.innerHTML = `${icons[type] || icons.info}<span>${message}</span>`;
         toast.className = `toast ${type}`;
-        
+
         // Trigger reflow to restart animation
         toast.offsetHeight;
         toast.classList.add('show');
-        
+
         setTimeout(() => {
             toast.classList.remove('show');
         }, duration);
     }
-    
+
     // Make toast function globally available
     window.showToast = showToast;
-    
+
     // ========================================
     // Page-specific Logic
     // ========================================
-    
+
     const loader = document.getElementById('loader');
     const errorMessage = document.getElementById('error-message');
     const errorText = document.getElementById('error-text');
@@ -99,7 +99,7 @@ document.addEventListener('DOMContentLoaded', () => {
         showLoader();
         try {
             let apiUrl = '';
-            
+
             // Determine API URL based on page logic
             if (type === 'college') {
                 apiUrl = '/api/toppers/college';
@@ -167,49 +167,34 @@ document.addEventListener('DOMContentLoaded', () => {
         container.innerHTML = '';
 
         if (type === 'college') {
-            // Group by college to render grid cards
-            const colleges = {};
-            data.forEach(s => {
-                if (!colleges[s.college_code]) {
-                    colleges[s.college_code] = s.college_name;
-                }
-            });
-
             const grid = document.createElement('div');
             grid.className = 'toppers-grid slide-up';
 
-            for (const [code, name] of Object.entries(colleges)) {
+            data.forEach(college => {
+                const displayName = college.college_name + (college.city ? `, ${college.city}` : '');
                 grid.innerHTML += `
-                    <div class="grid-card" onclick="window.location.href='topper-list.html?type=college&id=${code}&name=${encodeURIComponent(name)}'">
+                    <div class="grid-card" onclick="window.location.href='topper-list.html?type=college&id=${college.college_code}&name=${encodeURIComponent(displayName)}'">
                         <i class="fa-solid fa-building-columns card-icon"></i>
-                        <h3>${name}</h3>
+                        <h3 style="font-size: 1.05rem;">${displayName}</h3>
                         <p>Click to view branch toppers</p>
                     </div>
                 `;
-            }
+            });
             container.appendChild(grid);
 
         } else if (type === 'branch') {
-            // Group by branch to render grid cards
-            const branches = {};
-            data.forEach(s => {
-                if (!branches[s.course_code]) {
-                    branches[s.course_code] = s.course_name;
-                }
-            });
-
             const grid = document.createElement('div');
             grid.className = 'toppers-grid slide-up';
 
-            for (const [code, name] of Object.entries(branches)) {
+            data.forEach(branch => {
                 grid.innerHTML += `
-                    <div class="grid-card" onclick="window.location.href='topper-list.html?type=branch&id=${code}&name=${encodeURIComponent(name)}'">
+                    <div class="grid-card" onclick="window.location.href='topper-list.html?type=branch&id=${branch.course_code}&name=${encodeURIComponent(branch.course_name)}'">
                         <i class="fa-solid fa-code-branch card-icon"></i>
-                        <h3>${name}</h3>
+                        <h3 style="font-size: 1.05rem;">${branch.course_name}</h3>
                         <p>Click to view top performers across all colleges</p>
                     </div>
                 `;
-            }
+            });
             container.appendChild(grid);
 
         } else if (type === 'topper-list') {
@@ -229,7 +214,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (listType === 'college') {
                 // Show toppers for this specific college grouped by branch
                 filteredData = data.filter(s => s.college_code == listId);
-                
+
                 filteredData.forEach(student => {
                     const key = student.course_name;
                     if (!grouped[key]) grouped[key] = [];
@@ -239,7 +224,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 // Show the Rank 1 students from EACH college for this specific branch
                 // 'data' comes from /api/toppers/college, which has rank_in_college_branch!
                 filteredData = data.filter(s => s.course_code == listId && s.rank_in_college_branch === 1);
-                
+
                 // Group them under a single list
                 grouped['All Colleges Toppers'] = filteredData.sort((a, b) => parseFloat(b.cgpa) - parseFloat(a.cgpa));
             } else {
@@ -279,9 +264,9 @@ document.addEventListener('DOMContentLoaded', () => {
                             </thead>
                             <tbody>
                                 ${students.map((s, index) => {
-                                    // If we are showing all colleges toppers, rank them logically 1, 2, 3...
-                                    const displayRank = listType === 'branch' ? index + 1 : s.rank_in_college_branch;
-                                    return `
+                    // If we are showing all colleges toppers, rank them logically 1, 2, 3...
+                    const displayRank = listType === 'branch' ? index + 1 : s.rank_in_college_branch;
+                    return `
                                     <tr onclick="redirectToStudent('${s.registration_no}')" style="cursor: pointer;" class="clickable-row">
                                         <td data-label="Rank">
                                             <span class="rank-badge ${getRankBadge(displayRank)}">
@@ -290,11 +275,11 @@ document.addEventListener('DOMContentLoaded', () => {
                                         </td>
                                         <td data-label="Reg No">${s.registration_no}</td>
                                         <td data-label="Name"><strong>${s.name}</strong></td>
-                                        ${listType === 'branch' ? `<td data-label="College"><small>${s.college_name}</small></td>` : ''}
+                                        ${listType === 'branch' ? `<td data-label="College"><small>${s.college_name}${s.city ? ', ' + s.city : ''}</small></td>` : ''}
                                         <td data-label="CGPA"><span class="stat-value highlight" style="font-size: 1.1rem;">${s.cgpa}</span></td>
                                     </tr>
                                     `;
-                                }).join('')}
+                }).join('')}
                             </tbody>
                         </table>
                     </div>

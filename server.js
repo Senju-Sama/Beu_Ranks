@@ -159,6 +159,30 @@ app.get('/api/simulate/rank', async (req, res) => {
     }
 });
 
+// API endpoint to fetch all colleges
+app.get('/api/colleges', async (req, res) => {
+    try {
+        const sql = `SELECT * FROM college_mapping ORDER BY college_name`;
+        const rows = await dbAll(sql, []);
+        res.json(rows);
+    } catch (err) {
+        console.error('Error fetching colleges:', err.message);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
+// API endpoint to fetch all branches
+app.get('/api/branches', async (req, res) => {
+    try {
+        const sql = `SELECT * FROM course_mapping ORDER BY course_name`;
+        const rows = await dbAll(sql, []);
+        res.json(rows);
+    } catch (err) {
+        console.error('Error fetching branches:', err.message);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
 // API endpoint to fetch college toppers
 app.get('/api/toppers/college', async (req, res) => {
     try {
@@ -168,7 +192,6 @@ app.get('/api/toppers/college', async (req, res) => {
             JOIN college_mapping cm ON ct.college_code = cm.college_code
             JOIN course_mapping c ON ct.course_code = c.course_code
             ORDER BY ct.college_code, ct.course_code, ct.rank_in_college_branch
-            LIMIT 500
         `;
         const rows = await dbAll(sql, []);
         res.json(rows);
@@ -187,7 +210,6 @@ app.get('/api/toppers/branch', async (req, res) => {
             JOIN college_mapping cm ON bt.college_code = cm.college_code
             JOIN course_mapping c ON bt.course_code = c.course_code
             ORDER BY bt.course_code, bt.overall_rank
-            LIMIT 500
         `;
         const rows = await dbAll(sql, []);
         res.json(rows);
