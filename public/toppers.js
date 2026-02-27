@@ -170,7 +170,15 @@ document.addEventListener('DOMContentLoaded', () => {
             const grid = document.createElement('div');
             grid.className = 'toppers-grid slide-up';
 
+            // Group by college code to ensure unique cards
+            const uniqueColleges = new Map();
             data.forEach(college => {
+                if (!uniqueColleges.has(college.college_code)) {
+                    uniqueColleges.set(college.college_code, college);
+                }
+            });
+
+            uniqueColleges.forEach(college => {
                 const displayName = college.college_name + (college.city ? `, ${college.city}` : '');
                 grid.innerHTML += `
                     <div class="grid-card" onclick="window.location.href='topper-list.html?type=college&id=${college.college_code}&name=${encodeURIComponent(displayName)}'">
@@ -186,7 +194,15 @@ document.addEventListener('DOMContentLoaded', () => {
             const grid = document.createElement('div');
             grid.className = 'toppers-grid slide-up';
 
+            // Group by branch code to ensure unique cards
+            const uniqueBranches = new Map();
             data.forEach(branch => {
+                if (!uniqueBranches.has(branch.course_code)) {
+                    uniqueBranches.set(branch.course_code, branch);
+                }
+            });
+
+            uniqueBranches.forEach(branch => {
                 grid.innerHTML += `
                     <div class="grid-card" onclick="window.location.href='topper-list.html?type=branch&id=${branch.course_code}&name=${encodeURIComponent(branch.course_name)}'">
                         <i class="fa-solid fa-code-branch card-icon"></i>
