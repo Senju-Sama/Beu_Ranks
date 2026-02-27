@@ -15,6 +15,9 @@
 </head>
 
 <body>
+    <!-- Skip to Content Link -->
+    <a href="#main-content" class="skip-to-content">Skip to main content</a>
+
     <div class="background-elements">
         <div class="glow-orb orb-1"></div>
         <div class="glow-orb orb-2"></div>
@@ -22,11 +25,16 @@
     </div>
 
     <!-- Navigation Bar -->
-    <nav class="navbar glass-panel">
+    <nav class="navbar glass-panel" role="navigation" aria-label="Main navigation">
         <div class="nav-container">
             <div class="nav-brand">
                 <i class="fa-solid fa-graduation-cap"></i> Student Portal
             </div>
+            <button class="hamburger" aria-label="Toggle navigation menu" aria-expanded="false">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
             <ul class="nav-links">
                 <li><a href="index.html" class="active"><i class="fa-solid fa-house"></i> Home</a></li>
                 <li><a href="college-toppers.html"><i class="fa-solid fa-building-columns"></i> College Toppers</a></li>
@@ -41,15 +49,19 @@
             <p>Enter your 11-digit registration number to view your detailed academic performance</p>
         </header>
 
-        <main>
+        <main id="main-content">
             <div class="search-box">
                 <form id="search-form">
                     <div class="input-group">
                         <i class="fa-solid fa-id-card input-icon"></i>
                         <input type="text" id="reg-input" placeholder="e.g. 24104102001" pattern="[0-9]{11}" required
-                            title="Please enter a valid 11-digit registration number">
-                        <button type="submit" id="search-btn">
-                            <i class="fa-solid fa-magnifying-glass"></i> Search
+                            title="Please enter a valid 11-digit registration number"
+                            aria-label="Registration number">
+                        <button type="button" id="clear-btn" class="clear-btn hidden" aria-label="Clear input">
+                            <i class="fa-solid fa-xmark"></i>
+                        </button>
+                        <button type="submit" id="search-btn" aria-label="Search student">
+                            <i class="fa-solid fa-magnifying-glass"></i> <span class="btn-text">Search</span>
                         </button>
                     </div>
                 </form>
@@ -210,6 +222,14 @@
             <p>&copy; 2026 Student Result Portal. Data sourced from <span id="university-name">University</span>.</p>
         </footer>
     </div>
+
+    <!-- Scroll to Top Button -->
+    <button id="scroll-to-top" class="scroll-to-top" aria-label="Scroll to top">
+        <i class="fa-solid fa-arrow-up"></i>
+    </button>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="toast" role="alert" aria-live="polite"></div>
 
     <script src="script.js"></script>
 </body>

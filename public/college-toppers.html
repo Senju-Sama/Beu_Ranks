@@ -13,6 +13,9 @@
 </head>
 
 <body>
+    <!-- Skip to Content Link -->
+    <a href="#main-content" class="skip-to-content">Skip to main content</a>
+
     <div class="background-elements">
         <div class="glow-orb orb-1"></div>
         <div class="glow-orb orb-2"></div>
@@ -20,11 +23,16 @@
     </div>
 
     <!-- Navigation Bar -->
-    <nav class="navbar glass-panel">
+    <nav class="navbar glass-panel" role="navigation" aria-label="Main navigation">
         <div class="nav-container">
             <div class="nav-brand">
                 <i class="fa-solid fa-graduation-cap"></i> Student Portal
             </div>
+            <button class="hamburger" aria-label="Toggle navigation menu" aria-expanded="false">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
             <ul class="nav-links">
                 <li><a href="index.html"><i class="fa-solid fa-house"></i> Home</a></li>
                 <li><a href="college-toppers.html" class="active"><i class="fa-solid fa-building-columns"></i> College
@@ -40,7 +48,7 @@
             <p>Top performing students categorized by their respective colleges and branches.</p>
         </header>
 
-        <main>
+        <main id="main-content">
             <div id="loader" class="hidden">
                 <div class="spinner"></div>
                 <p>Fetching college toppers...</p>
@@ -61,6 +69,14 @@
                     University, Patna</span>.</p>
         </footer>
     </div>
+
+    <!-- Scroll to Top Button -->
+    <button id="scroll-to-top" class="scroll-to-top" aria-label="Scroll to top">
+        <i class="fa-solid fa-arrow-up"></i>
+    </button>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="toast" role="alert" aria-live="polite"></div>
 
     <!-- Add script for fetching and rendering toppers -->
     <script src="toppers.js" data-type="college"></script>

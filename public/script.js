@@ -1,11 +1,132 @@
 document.addEventListener('DOMContentLoaded', () => {
+    // ========================================
+    // Global UI Components
+    // ========================================
+    
+    // Hamburger Menu Toggle
+    const hamburger = document.querySelector('.hamburger');
+    const navLinks = document.querySelector('.nav-links');
+    
+    if (hamburger && navLinks) {
+        hamburger.addEventListener('click', () => {
+            hamburger.classList.toggle('active');
+            navLinks.classList.toggle('active');
+            const isExpanded = hamburger.classList.contains('active');
+            hamburger.setAttribute('aria-expanded', isExpanded);
+        });
+        
+        // Close menu when clicking a link
+        navLinks.querySelectorAll('a').forEach(link => {
+            link.addEventListener('click', () => {
+                hamburger.classList.remove('active');
+                navLinks.classList.remove('active');
+                hamburger.setAttribute('aria-expanded', 'false');
+            });
+        });
+        
+        // Close menu when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!hamburger.contains(e.target) && !navLinks.contains(e.target)) {
+                hamburger.classList.remove('active');
+                navLinks.classList.remove('active');
+                hamburger.setAttribute('aria-expanded', 'false');
+            }
+        });
+    }
+    
+    // Scroll to Top Button
+    const scrollToTopBtn = document.getElementById('scroll-to-top');
+    
+    if (scrollToTopBtn) {
+        window.addEventListener('scroll', () => {
+            if (window.pageYOffset > 300) {
+                scrollToTopBtn.classList.add('visible');
+            } else {
+                scrollToTopBtn.classList.remove('visible');
+            }
+        });
+        
+        scrollToTopBtn.addEventListener('click', () => {
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+        });
+    }
+    
+    // Toast Notification System
+    function showToast(message, type = 'info', duration = 3000) {
+        const toast = document.getElementById('toast');
+        if (!toast) return;
+        
+        const icons = {
+            success: '<i class="fa-solid fa-circle-check"></i>',
+            error: '<i class="fa-solid fa-circle-exclamation"></i>',
+            info: '<i class="fa-solid fa-circle-info"></i>'
+        };
+        
+        toast.innerHTML = `${icons[type] || icons.info}<span>${message}</span>`;
+        toast.className = `toast ${type}`;
+        
+        // Trigger reflow to restart animation
+        toast.offsetHeight;
+        toast.classList.add('show');
+        
+        setTimeout(() => {
+            toast.classList.remove('show');
+        }, duration);
+    }
+    
+    // Make toast function globally available
+    window.showToast = showToast;
+    
+    // ========================================
+    // Page-specific Logic (Index Page Only)
+    // ========================================
+    
     const searchForm = document.getElementById('search-form');
     const regInput = document.getElementById('reg-input');
+    const clearBtn = document.getElementById('clear-btn');
+    const searchBtn = document.getElementById('search-btn');
     const loader = document.getElementById('loader');
     const errorMessage = document.getElementById('error-message');
     const errorText = document.getElementById('error-text');
     const resultContainer = document.getElementById('result-container');
     const simulateBtn = document.getElementById('simulate-btn');
+
+    // Early exit if this is not the index page
+    if (!searchForm) return;
+    
+    // Clear Button Functionality
+    if (clearBtn && regInput) {
+        regInput.addEventListener('input', () => {
+            if (regInput.value.trim().length > 0) {
+                clearBtn.classList.remove('hidden');
+            } else {
+                clearBtn.classList.add('hidden');
+            }
+        });
+        
+        clearBtn.addEventListener('click', () => {
+            regInput.value = '';
+            clearBtn.classList.add('hidden');
+            regInput.focus();
+        });
+    }
+    
+    // Input validation feedback
+    if (regInput) {
+        regInput.addEventListener('input', (e) => {
+            const value = e.target.value;
+            // Allow only numbers
+            e.target.value = value.replace(/[^0-9]/g, '');
+            
+            // Limit to 11 digits
+            if (e.target.value.length > 11) {
+                e.target.value = e.target.value.slice(0, 11);
+            }
+        });
+    }
 
     let theoryChart = null;
     let practicalChart = null;
@@ -21,6 +142,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (prefillRegNo) {
         regInput.value = prefillRegNo;
+        if (clearBtn) clearBtn.classList.remove('hidden');
         // Trigger the search automatically
         setTimeout(() => searchForm.dispatchEvent(new Event('submit')), 100);
     }
@@ -29,11 +151,25 @@ document.addEventListener('DOMContentLoaded', () => {
         e.preventDefault();
 
         const regNo = regInput.value.trim();
-        if (!regNo) return;
+        if (!regNo) {
+            showToast('Please enter a registration number', 'error');
+            return;
+        }
+        
+        if (regNo.length !== 11) {
+            showToast('Registration number must be 11 digits', 'error');
+            return;
+        }
 
         // UI Reset
         hideAll();
         showLoader();
+        
+        // Add loading state to button
+        if (searchBtn) {
+            searchBtn.disabled = true;
+            searchBtn.classList.add('loading');
+        }
 
         try {
             const response = await fetch(`/api/student/${regNo}`);
@@ -54,6 +190,7 @@ document.addEventListener('DOMContentLoaded', () => {
             renderData(data);
             hideLoader();
             resultContainer.classList.remove('hidden');
+            showToast('Student data loaded successfully!', 'success');
 
             // Retrigger animations
             const animatedElements = document.querySelectorAll('.slide-up');
@@ -66,6 +203,13 @@ document.addEventListener('DOMContentLoaded', () => {
         } catch (error) {
             hideLoader();
             showError(error.message);
+            showToast(error.message, 'error');
+        } finally {
+            // Remove loading state from button
+            if (searchBtn) {
+                searchBtn.disabled = false;
+                searchBtn.classList.remove('loading');
+            }
         }
     });
 
@@ -158,13 +302,13 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             tr.innerHTML = `
-                <td>${sub.subject_code}</td>
-                <td><strong>${sub.subject_name}</strong></td>
-                <td>${sub.credit}</td>
-                <td>${sub.ese}</td>
-                <td>${sub.ia}</td>
-                <td class="${hasChanged ? 'simulated-value' : ''}">${totalHtml}</td>
-                <td><span class="grade grade-${gradeClass}">${sub.grade}</span></td>
+                <td data-label="Code">${sub.subject_code}</td>
+                <td data-label="Subject"><strong>${sub.subject_name}</strong></td>
+                <td data-label="Credit">${sub.credit}</td>
+                <td data-label="ESE">${sub.ese}</td>
+                <td data-label="IA">${sub.ia}</td>
+                <td data-label="Total" class="${hasChanged ? 'simulated-value' : ''}">${totalHtml}</td>
+                <td data-label="Grade"><span class="grade grade-${gradeClass}">${sub.grade}</span></td>
             `;
             tbody.appendChild(tr);
         });
