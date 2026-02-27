@@ -28,11 +28,11 @@ Key logic:
 - `registration_no` is PRIMARY KEY.
 - `college_code` is normalized to 3 digits.
 
-## 3) Fix College Codes (from Registration Number)
+## 3) Fix College Codes (from JSON payload)
 
 Rule:
-- College code is the 3-digit segment inside `registration_no` (positions 3-5).
-  Example: `24153125045` -> college code `153`.
+- The actual correct college code is stored in the `student.college.college_code` field of the `results.jsonl` object. It should NOT be extracted from the registration number.
+  Example JSON: `"college": {"college_code": 165, "college_name": "Shri Phanishwar..."}`
 
 Script:
 
@@ -41,8 +41,8 @@ python fix_college_codes.py
 ```
 
 What it does:
-- Rebuilds `college_mapping` using the official code->name list.
-- Updates `students.college_code` by extracting from `registration_no`.
+- Rebuilds `college_mapping` using the codes embedded in the JSON payload (resulting in 52 unique colleges).
+- Ensures `students.college_code` matches the JSON hierarchy.
 
 ## 4) Create Mapping Tables
 
