@@ -240,7 +240,8 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('student-mother').textContent = data.student.mother_name;
         document.getElementById('student-college').textContent = `${data.student.college.college_name} (${data.student.college.city})`;
         document.getElementById('student-course').textContent = data.student.course.course_name;
-        document.getElementById('university-name').textContent = data.university;
+        const universityEl = document.getElementById('university-name');
+        if (universityEl) universityEl.textContent = data.university;
 
         // Populate Performance Stats
         document.getElementById('student-cgpa').textContent = data.performance.cgpa;
