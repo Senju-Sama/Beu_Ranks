@@ -104,10 +104,12 @@ document.addEventListener('DOMContentLoaded', () => {
             if (type === 'college') {
                 apiUrl = '/api/toppers/college';
             } else if (type === 'branch') {
-                // To show all college's topper, we fetch from /api/toppers/college and filter later
-                apiUrl = '/api/toppers/college';
+                apiUrl = '/api/toppers/branch';
             } else if (type === 'topper-list') {
-                apiUrl = '/api/toppers/college'; // We will filter this based on URL parameters
+                // For the detail page, the endpoint depends on whether we are showing
+                // a college's branch toppers or a branch's college toppers
+                const listType = new URLSearchParams(window.location.search).get('type');
+                apiUrl = listType === 'branch' ? '/api/toppers/branch' : '/api/toppers/college';
             }
 
             const response = await fetch(apiUrl);
@@ -237,12 +239,11 @@ document.addEventListener('DOMContentLoaded', () => {
                     grouped[key].push(student);
                 });
             } else if (listType === 'branch') {
-                // Show the Rank 1 students from EACH college for this specific branch
-                // 'data' comes from /api/toppers/college, which has rank_in_college_branch!
-                filteredData = data.filter(s => s.course_code == listId && s.rank_in_college_branch === 1);
+                // data comes from /api/toppers/branch — one entry per college per branch
+                filteredData = data.filter(s => s.course_code == listId);
 
-                // Group them under a single list
-                grouped['All Colleges Toppers'] = filteredData.sort((a, b) => parseFloat(b.cgpa) - parseFloat(a.cgpa));
+                // Sort by overall rank (ascending) 
+                grouped['All Colleges Toppers'] = filteredData.sort((a, b) => a.overall_rank - b.overall_rank);
             } else {
                 showError("Invalid parameters.");
                 return;
