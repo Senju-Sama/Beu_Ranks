@@ -318,5 +318,5 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // Global function to redirect to main page with search param
 window.redirectToStudent = function (regNo) {
-    window.location.href = `index.html?reg_no=${regNo}`;
+    window.location.href = `search.html?reg_no=${regNo}`;
 };
